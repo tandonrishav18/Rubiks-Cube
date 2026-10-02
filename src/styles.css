@@ -116,6 +116,7 @@ canvas { display: block; touch-action: none; opacity: 1; transition: opacity 360
   .open-cube { right: 20px; bottom: 16px; }
   .play-cube { right: auto; left: 20px; }
   .gallery-back { top: 10px; left: 10px; }
+  .preview-back { top: auto; left: auto; }
   .pocket-empty svg { width: 16px; height: 16px; }
 }
 @media (hover: none) { .pocket-empty svg { opacity: 0.22; } }
