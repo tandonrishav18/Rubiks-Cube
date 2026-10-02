@@ -404,7 +404,7 @@ const Cube = forwardRef(function Cube({ onChange, images = {}, onOpen }, ref) {
 
   // ---------- render ----------
   return (
-    <group ref={rootRef} position={[0, viewportWidth <= 720 ? 0.3 : 0, 0]} scale={viewportWidth <= 720 ? 0.91 : 1.1}>
+    <group ref={rootRef} position={[0, viewportWidth <= 720 ? 0.3 : 0, 0]} scale={viewportWidth <= 720 ? 0.91 * 1.1 : 1.1}>
       {cubies.current.map((c, i) => (
         <group
           key={i}
