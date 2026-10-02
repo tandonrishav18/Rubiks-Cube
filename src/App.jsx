@@ -298,7 +298,7 @@ export default function App() {
 
       {playMode && !galleryOpen && (
         <button className="open-cube" onClick={() => cubeRef.current?.scramble(40)}>
-          <span className="open-cube-label">Shuffle</span>
+          <span className="open-cube-label">Scramble</span>
         </button>
       )}
 

@@ -54,6 +54,7 @@ const Cube = forwardRef(function Cube({ onChange, images = {}, onOpen }, ref) {
   const camera = useThree((s) => s.camera)
   const gl = useThree((s) => s.gl)
   const controls = useThree((s) => s.controls)
+  const viewportWidth = useThree((s) => s.size.width)
 
   const cubies = useRef(null)
   if (!cubies.current) cubies.current = createCubies()
@@ -403,7 +404,7 @@ const Cube = forwardRef(function Cube({ onChange, images = {}, onOpen }, ref) {
 
   // ---------- render ----------
   return (
-    <group ref={rootRef} scale={1.1}>
+    <group ref={rootRef} scale={viewportWidth <= 720 ? 0.91 : 1.1}>
       {cubies.current.map((c, i) => (
         <group
           key={i}
