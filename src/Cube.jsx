@@ -19,6 +19,7 @@ import {
 
 const CUBIE_SIZE = 0.95
 const STICKER_SIZE = 0.8
+const STICKER_BORDER = 0.018
 const DRAG_THRESHOLD = 0.1 // world units before a drag picks its direction
 const DRAG_RADIUS = 1.5 // world units of drag per radian of turn
 
@@ -38,12 +39,18 @@ function roundedSquareGeometry(size, r) {
   s.quadraticCurveTo(-h, h, -h, h - r)
   s.lineTo(-h, -h + r)
   s.quadraticCurveTo(-h, -h, -h + r, -h)
-  return new THREE.ShapeGeometry(s, 8)
+  const geometry = new THREE.ShapeGeometry(s, 8)
+  const uvs = geometry.getAttribute('uv')
+  for (let i = 0; i < uvs.count; i++) {
+    uvs.setXY(i, uvs.getX(i) / size + 0.5, uvs.getY(i) / size + 0.5)
+  }
+  uvs.needsUpdate = true
+  return geometry
 }
 
 const Z_UP = new THREE.Vector3(0, 0, 1)
 
-const Cube = forwardRef(function Cube({ onChange }, ref) {
+const Cube = forwardRef(function Cube({ onChange, images = {}, onOpen }, ref) {
   const camera = useThree((s) => s.camera)
   const gl = useThree((s) => s.gl)
   const controls = useThree((s) => s.controls)
@@ -59,24 +66,25 @@ const Cube = forwardRef(function Cube({ onChange }, ref) {
 
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
+  const onOpenRef = useRef(onOpen)
+  onOpenRef.current = onOpen
   const controlsRef = useRef(controls)
   controlsRef.current = controls
 
   // ---------- shared geometry / materials ----------
   const stickerGeo = useMemo(() => roundedSquareGeometry(STICKER_SIZE, 0.09), [])
+  const stickerBorderGeo = useMemo(
+    () => roundedSquareGeometry(STICKER_SIZE + STICKER_BORDER * 2, 0.09 + STICKER_BORDER),
+    [],
+  )
   const bodyMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#0d0d0f', roughness: 0.55, metalness: 0.1 }),
+    () => new THREE.MeshLambertMaterial({ color: '#0d0d0f' }),
     []
   )
   const stickerMats = useMemo(() => {
     const m = {}
     for (const c of Object.values(COLORS))
-      m[c] = new THREE.MeshPhysicalMaterial({
-        color: c,
-        roughness: 0.28,
-        clearcoat: 0.6,
-        clearcoatRoughness: 0.2,
-      })
+      m[c] = new THREE.MeshLambertMaterial({ color: c })
     return m
   }, [])
 
@@ -223,6 +231,9 @@ const Cube = forwardRef(function Cube({ onChange }, ref) {
       const hits = raycaster.intersectObject(rootRef.current, true)
       if (!hits.length) return
       if (beginDrag(hits[0], ev.pointerId)) {
+        drag.current.pointerStartX = ev.clientX
+        drag.current.pointerStartY = ev.clientY
+        drag.current.pointerMoved = false
         if (controlsRef.current) controlsRef.current.enabled = false
       }
     }
@@ -230,6 +241,8 @@ const Cube = forwardRef(function Cube({ onChange }, ref) {
     const onMove = (ev) => {
       const d = drag.current
       if (!d || ev.pointerId !== d.pointerId) return
+      if (Math.hypot(ev.clientX - d.pointerStartX, ev.clientY - d.pointerStartY) > 4)
+        d.pointerMoved = true
       setRay(ev)
       if (!raycaster.ray.intersectPlane(d.plane, hit)) return
       delta.copy(hit).sub(d.start)
@@ -286,7 +299,11 @@ const Cube = forwardRef(function Cube({ onChange }, ref) {
       if (controlsRef.current) controlsRef.current.enabled = true
 
       const a = anim.current
-      if (!d.decided || !a || a.mode !== 'drag') return
+      if (!d.decided) {
+        if (!d.pointerMoved) onOpenRef.current?.()
+        return
+      }
+      if (!a || a.mode !== 'drag') return
       // Flick: carry velocity forward, then snap to the nearest quarter turn
       const vel = performance.now() - d.lastTime > 90 ? 0 : d.vel
       const projected = a.angle + clamp(vel * 0.12, -QUARTER * 0.7, QUARTER * 0.7)
@@ -386,7 +403,7 @@ const Cube = forwardRef(function Cube({ onChange }, ref) {
 
   // ---------- render ----------
   return (
-    <group ref={rootRef}>
+    <group ref={rootRef} scale={1.1}>
       {cubies.current.map((c, i) => (
         <group
           key={i}
@@ -401,17 +418,30 @@ const Cube = forwardRef(function Cube({ onChange }, ref) {
             if (!drag.current) document.body.style.cursor = ''
           }}
         >
-          <RoundedBox args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE]} radius={0.07} smoothness={3}>
+          <RoundedBox
+            args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE]}
+            radius={0.07}
+            smoothness={3}
+          >
             <primitive object={bodyMat} attach="material" />
           </RoundedBox>
           {c.stickers.map((s, j) => (
-            <mesh
+            <group
               key={j}
-              geometry={stickerGeo}
-              material={stickerMats[s.color]}
               position={s.normal.clone().multiplyScalar(CUBIE_SIZE / 2 + 0.003).toArray()}
               quaternion={new THREE.Quaternion().setFromUnitVectors(Z_UP, s.normal)}
-            />
+            >
+              <mesh geometry={stickerBorderGeo}>
+                <meshBasicMaterial color={s.color} toneMapped={false} />
+              </mesh>
+              <mesh geometry={stickerGeo} position={[0, 0, 0.001]}>
+                {images[s.slot] ? (
+                  <meshBasicMaterial map={images[s.slot]} toneMapped={false} />
+                ) : (
+                  <primitive object={stickerMats[s.color]} attach="material" />
+                )}
+              </mesh>
+            </group>
           ))}
         </group>
       ))}

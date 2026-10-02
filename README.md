@@ -1,88 +1,26 @@
-# 3D Rubik's Cube AI Coach
+# Cube Gallery
 
-An interactive 3D Rubik's Cube with a solver-backed AI coach that helps users solve the cube step by step.
+A personal image gallery arranged across an interactive 3D cube. Each of the cube's 54 stickers has its own image pocket.
 
-The cube can be manipulated directly, scrambled, solved, and reset. Solution steps can also be played back on the 3D cube, so users can actually see each move being performed.
-
-## Getting Started
-
-### 1. Clone the repository
+## Run locally
 
 ```bash
-git clone YOUR_GITHUB_REPO_URL
-cd YOUR_PROJECT_FOLDER
-npm i
-```
-### 2. Create .env
-
-Create a .env file 
-
-### 3. Get a GEMINI KEY
-
-Create a GEMINI API KEY on https://aistudio.google.com/api-keys
-
-Place the key in the .env file
-
-```
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-```
-
-### 4. Start the project
-
-```
+npm install
 npm run dev
 ```
 
-## Live Demo
+## Use the gallery
 
-🔗 [Try the Rubik's Cube AI Coach](https://rubix-cube-ai-coach.netlify.app/)
+- Drag the cube to turn a face or orbit the view.
+- Click the cube, or choose **Open cube**, to unfold the six faces into a gallery plane.
+- Select any empty pocket to upload an image. Select a filled pocket to view it, or use its remove control to replace it later.
+- Uploaded images are saved as files in `public/gallery/`, indexed by `public/gallery/manifest.json`, and appear on their matching cube stickers.
+- Keep the `public/gallery/` files and manifest when sharing or committing the project; Vite includes them in the production build.
 
-## Screenshots
+Uploads and removals write to the local project through the Vite development server, so run `npm run dev` while editing the gallery. A built/static deployment can display bundled gallery images but needs a writable server to accept new uploads.
 
-### AI Coach
+## Technology
 
-<img width="2048" height="1272" alt="image" src="https://github.com/user-attachments/assets/bccf6177-4193-4dc8-90c2-9be905a051ee" />
-
-### 3D Cube
-
-<img width="2048" height="1070" alt="image" src="https://github.com/user-attachments/assets/7c3d45ff-9873-4d69-8178-53804d882a47" />
-
-## Features
-
-- Interactive 3D Rubik's Cube
-- Scramble, solve, undo and reset
-- Step-by-step solution playback
-- Animated cube moves
-- AI Coach powered by Google Gemini
-- Beginner-friendly Learn mode
-- Fastest solving mode
-- Ask questions about the current solving step
-- Solver-backed hints when AI is unavailable
-- Move counter and solve timer
-- Responsive interface
-
-## Tech Stack
-
-- React
-- React Three Fiber
-- Three.js
-- JavaScript
-- Google Gemini API
-- Vite
-
-## How It Works
-
-The cube maintains its own state while the solver generates the moves required to reach the solved state.
-
-Each solution move can then be played directly on the 3D cube. The cube updates its internal state while the corresponding layer is animated visually.
-
-```text
-Cube State
-    ↓
-Solver
-    ↓
-Solution Moves
-    ↓
-3D Move Animation
-    ↓
-Updated Cube State<img width="2048" height="1272" alt="Screenshot 2026-09-17 at 11 18 14 AM" src="https://github.com/user-attachments/assets/2514c260-bbab-428b-bb1f-db02bd1fc877" />
+- React and Vite
+- React Three Fiber and Three.js
+- IndexedDB for local image storage

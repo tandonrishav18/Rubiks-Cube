@@ -10,12 +10,12 @@ export const AXES = [
 
 // Standard colour scheme: white top, green front, red right
 export const COLORS = {
-  U: '#f4f4f4', // white
+  U: '#FFFFFF', // white
   D: '#ffd500', // yellow
-  F: '#009e60', // green
-  B: '#0051ba', // blue
-  R: '#c41e3a', // red
-  L: '#ff6a00', // orange
+  F: '#009B48', // green
+  B: '#0046AD', // blue
+  R: '#B71234', // red
+  L: '#FF5800', // orange
 }
 
 // FACE_BY_NORMAL[axis][sign > 0 ? 1 : 0]
@@ -55,7 +55,10 @@ export function createCubies() {
           if (v === 0) continue
           const normal = new THREE.Vector3()
           normal.setComponent(axis, v)
-          stickers.push({ normal, color: COLORS[FACE_BY_NORMAL[axis][v > 0 ? 1 : 0]] })
+          const face = FACE_BY_NORMAL[axis][v > 0 ? 1 : 0]
+          const row = face === 'U' ? 1 - z : face === 'D' ? z + 1 : 1 - y
+          const col = face === 'R' ? 1 - z : face === 'L' ? z + 1 : face === 'B' ? 1 - x : x + 1
+          stickers.push({ normal, color: COLORS[face], slot: `${face}-${row}-${col}` })
         }
         list.push({
           home: new THREE.Vector3(x, y, z),
