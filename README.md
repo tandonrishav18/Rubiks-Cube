@@ -1,6 +1,6 @@
 # Cube Gallery
 
-A personal image gallery arranged across an interactive 3D cube. Each of the cube's 54 stickers has its own image pocket.
+A gallery I designed myself, with a twist of gameplay. Explore, play, and discover it now.
 
 ## Run locally
 
